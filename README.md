@@ -7,6 +7,8 @@ APK下载地址： [CradleAI 1.0.0](https://cradleintro.top/Cradle-1.0.0-release
 
 ### 1. EAS Build 进行打包和部署：
 
+任何人都可以通过以下进行方式打包：
+
 1. **Android 平台打包**  
    在项目根目录下执行以下命令，通过 EAS 构建 Android 安装包（APK 或 AAB）：
    ```bash
@@ -21,10 +23,14 @@ APK下载地址： [CradleAI 1.0.0](https://cradleintro.top/Cradle-1.0.0-release
    ```
    但目前尚未在苹果设备真机环境下充分测试，建议谨慎用于生产环境。
 
-> **注意**：请确保已正确配置 Expo 账户、EAS CLI 及相关平台证书。详细配置与分发流程请参考 [Expo 官方文档](https://docs.expo.dev/build/introduction/)。
+> **注意**：打包之前，请确保已正确配置 Expo 账户、EAS CLI 及相关平台证书。详细配置与分发流程请参考 [Expo 官方文档](https://docs.expo.dev/build/introduction/)。
 
 
 ### 2. 或直接下载APK
+
+## 简介
+
+本项目独立实现了与SillyTavern功能等效的世界书、预设和角色信息，并支持SillyTavern角色信息全量和完整的导入，另外还支持一系列扩展功能供开发者探索。
 
 ## 主要功能
 
@@ -33,7 +39,7 @@ APK下载地址： [CradleAI 1.0.0](https://cradleintro.top/Cradle-1.0.0-release
 - 角色可自定义头像、背景、动态立绘视频。
 - 管理模式下可批量删除、导出角色数据，支持角色图库和图片生成。
 
-### 2. 智能聊天
+### 2. 聊天功能
 - 独立实现了与SillyTavern功能等效的世界书、预设和角色信息系统：
   - **世界书条目管理**：自动注入相关世界设定条目到对话，根据对话关键词智能匹配
   - **预设条目处理**：自定义位置，深度，角色的预设条目
@@ -143,7 +149,6 @@ APK下载地址： [CradleAI 1.0.0](https://cradleintro.top/Cradle-1.0.0-release
 ### 8. 其他功能
 - 支持 API 设置、模型预算、存储管理、社区入口等扩展功能。
 - 支持多种主题与界面自定义。
-
 
 ## 当前限制
 
