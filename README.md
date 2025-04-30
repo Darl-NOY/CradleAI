@@ -1,9 +1,40 @@
 
-APK下载地址： [CradleAI 1.0.0](https://cradleintro.top/Cradle-1.0.0-release.apk)
+## APK下载地址： 
 
-## 部署方法
+[CradleAI 1.0.0](https://cradleintro.top/Cradle-1.0.0-release.apk)
 
+## APP 预览
 
+以下是APP的一些截图预览：
+
+<table style="border-collapse: collapse; width: 100%;">
+  <tr>
+    <td style="text-align: center; padding: 5px;">
+      <img src="https://cradleintro.top/app-screenshot.png" alt="APP截图 1" style="max-width: 150px; border: 1px solid #ddd;">
+      <br>
+    </td>
+    <td style="text-align: center; padding: 5px;">
+      <img src="https://cradleintro.top/app-screenshot2.png" alt="APP截图 2" style="max-width: 150px; border: 1px solid #ddd;">
+      <br>
+    </td>
+    <td style="text-align: center; padding: 5px;">
+      <img src="https://cradleintro.top/app-screenshot3.png" alt="APP截图 3" style="max-width: 150px; border: 1px solid #ddd;">
+      <br>
+    </td>
+    <td style="text-align: center; padding: 5px;">
+      <img src="https://cradleintro.top/app-screenshot4.png" alt="APP截图 4" style="max-width: 150px; border: 1px solid #ddd;">
+      <br>
+    </td>
+    <td style="text-align: center; padding: 5px;">
+      <img src="https://cradleintro.top/app-screenshot5.png" alt="APP截图 5" style="max-width: 150px; border: 1px solid #ddd;">
+      <br>
+    </td>
+    <td style="text-align: center; padding: 5px;">
+      <img src="https://cradleintro.top/app-screenshot6.png" alt="APP截图 6" style="max-width: 150px; border: 1px solid #ddd;">
+      <br>
+    </td>
+  </tr>
+</table>
 
 ### 1. EAS Build 进行打包和部署：
 
