@@ -1,3 +1,6 @@
+
+[CradleAI 1.0.0](https://cradleintro.top/Cradle-1.0.0-release.apk)
+
 ## 主要功能
 
 ### 1. 角色管理
