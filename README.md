@@ -1,5 +1,30 @@
 
-[CradleAI 1.0.0](https://cradleintro.top/Cradle-1.0.0-release.apk)
+APK下载地址： [CradleAI 1.0.0](https://cradleintro.top/Cradle-1.0.0-release.apk)
+
+## 部署方法
+
+
+
+### 1. EAS Build 进行打包和部署：
+
+1. **Android 平台打包**  
+   在项目根目录下执行以下命令，通过 EAS 构建 Android 安装包（APK 或 AAB）：
+   ```bash
+   eas build --platform android
+   ```
+   构建完成后，可在 Expo 控制台下载生成的安装包进行分发或安装。
+
+2. **iOS 平台打包**  
+   亦可通过如下命令为 iOS 平台生成 IPA 包：
+   ```bash
+   eas build --platform ios
+   ```
+   但目前尚未在苹果设备真机环境下充分测试，建议谨慎用于生产环境。
+
+> **注意**：请确保已正确配置 Expo 账户、EAS CLI 及相关平台证书。详细配置与分发流程请参考 [Expo 官方文档](https://docs.expo.dev/build/introduction/)。
+
+
+### 2. 或直接下载APK
 
 ## 主要功能
 
@@ -119,25 +144,6 @@
 - 支持 API 设置、模型预算、存储管理、社区入口等扩展功能。
 - 支持多种主题与界面自定义。
 
-## 部署方法
-
-本应用基于 [Expo](https://expo.dev/) 框架开发，推荐使用 EAS Build 进行打包和部署：
-
-1. **Android 平台打包**  
-   在项目根目录下执行以下命令，通过 EAS 构建 Android 安装包（APK 或 AAB）：
-   ```bash
-   eas build --platform android
-   ```
-   构建完成后，可在 Expo 控制台下载生成的安装包进行分发或安装。
-
-2. **iOS 平台打包**  
-   亦可通过如下命令为 iOS 平台生成 IPA 包：
-   ```bash
-   eas build --platform ios
-   ```
-   但目前尚未在苹果设备真机环境下充分测试，建议谨慎用于生产环境。
-
-> **注意**：请确保已正确配置 Expo 账户、EAS CLI 及相关平台证书。详细配置与分发流程请参考 [Expo 官方文档](https://docs.expo.dev/build/introduction/)。
 
 ## 当前限制
 
