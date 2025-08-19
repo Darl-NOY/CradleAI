@@ -35,7 +35,7 @@
 </table>
 
 ## 联系与反馈
-*   **Discord:** https://discord.gg/bMfCkuYM  (教程、答疑、bug 反馈、意见反馈)
+*   **Discord:** [https://discord.gg/bMfCkuYM](https://discord.gg/VFkTm9Bj)  (教程、答疑、bug 反馈、意见反馈)
 *   **QQ 群:** (答疑、bug 反馈、意见反馈)
   
 二群：570343684
@@ -45,6 +45,16 @@
 
 1.0.5更新日志：
 ```
+[实验性功能]
+
+-剧本功能和朋友圈表情包功能
+
+小修复
+
+-恢复顶部栏隐藏功能
+
+-修复一些UI小问题
+
 性能
 
 -性能和流畅度明显提升，解决很多性能瓶颈
