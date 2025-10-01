@@ -3,6 +3,8 @@
 
 [DeepWiki](https://deepwiki.com/AliceSyndrome285/CradleAI/5.2-memory-ui-and-table-memory-plugin)
 
+[在线VN编辑器](https://vnedit.cradleintro.top)
+
 ## 界面预览
 
 <table style="border-collapse: collapse; width: 100%;">
