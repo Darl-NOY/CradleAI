@@ -1,9 +1,9 @@
-name: RN Android No ProGuard Test
+name: RN Android Multi-Arch Build
 
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:
+    tags: [ 'v*' ]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -22,7 +22,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18.x
+          node-version: 19.x
           cache: 'npm'
 
       - name: Setup Java
@@ -63,22 +63,113 @@ jobs:
             perl -i -pe 's/(android\s*\{)/\1\n  splits {\n    abi {\n      enable true\n      reset()\n      include "${{ matrix.abi }}"\n      universalApk true\n    }\n  }/' android/app/build.gradle
           fi
 
-      - name: Enable Hermes and optimize build
+      - name: Configure ProGuard for release
         run: |
-          # 启用Hermes引擎优化性能
-          echo "启用Hermes引擎进行性能优化"
-          
-          # 确保Hermes已启用
-          if ! grep -q "enableHermes" android/app/build.gradle; then
-            perl -i -pe 's/(android\s*\{)/\1\n    project.ext.react = [\n        enableHermes: true\n    ]/' android/app/build.gradle
-          fi
-          
-          # 适度启用优化而不是完全禁用ProGuard
+          # 启用代码压缩但禁用混淆，避免Matrix SDK问题
           if ! grep -q "minifyEnabled true" android/app/build.gradle; then
-            perl -i -pe 's/(release\s*\{)/\1\n            minifyEnabled true\n            shrinkResources true\n            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"/' android/app/build.gradle
+            perl -i -pe 's/(release\s*\{)/\1\n            minifyEnabled true\n            shrinkResources false\n            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"/' android/app/build.gradle
           fi
           
-          echo "Hermes已启用，构建优化已配置"
+          # 创建更安全的ProGuard规则文件
+          cat > android/app/proguard-rules.pro << 'EOF'
+          # Keep React Native and Expo
+          -keep class com.facebook.react.** { *; }
+          -keep class com.facebook.hermes.** { *; }
+          -keep class expo.** { *; }
+          -keep class versioned.host.exp.exponent.** { *; }
+          -dontwarn com.facebook.react.**
+          -dontwarn expo.**
+          
+          # Keep Matrix SDK
+          -keep class org.matrix.** { *; }
+          -keep class matrix.** { *; }
+          -dontwarn org.matrix.**
+          -dontwarn matrix.**
+          
+          # Keep Node.js polyfills
+          -keep class com.peel.** { *; }
+          -keep class com.tradle.** { *; }
+          -keep class stream.** { *; }
+          -keep class crypto.** { *; }
+          -keep class buffer.** { *; }
+          -keep class events.** { *; }
+          -keep class util.** { *; }
+          -keep class url.** { *; }
+          -keep class querystring.** { *; }
+          -dontwarn com.peel.**
+          -dontwarn com.tradle.**
+          -dontwarn stream.**
+          -dontwarn crypto.**
+          -dontwarn buffer.**
+          -dontwarn events.**
+          -dontwarn util.**
+          -dontwarn url.**
+          -dontwarn querystring.**
+          
+          # Keep polyfills and native modules
+          -keep class * implements com.facebook.react.bridge.NativeModule { *; }
+          -keep class * implements com.facebook.react.turbomodule.core.TurboModule { *; }
+          -keep class * implements com.facebook.react.bridge.JavaScriptModule { *; }
+          
+          # Keep application entry points
+          -keep class * extends android.app.Application
+          -keep class * extends android.app.Activity
+          -keep class * extends android.app.Service
+          -keep class * extends android.content.BroadcastReceiver
+          -keep class * extends android.content.ContentProvider
+          
+          # Keep AsyncStorage
+          -keep class com.reactnativecommunity.asyncstorage.** { *; }
+          -dontwarn com.reactnativecommunity.asyncstorage.**
+          
+          # Keep Video components
+          -keep class com.brentvatne.** { *; }
+          -dontwarn com.brentvatne.**
+          
+          # Keep WebView
+          -keep class com.reactnativecommunity.webview.** { *; }
+          -dontwarn com.reactnativecommunity.webview.**
+          
+          # Keep SQLite
+          -keep class org.sqlite.** { *; }
+          -keep class io.expo.sqlite.** { *; }
+          -dontwarn org.sqlite.**
+          -dontwarn io.expo.sqlite.**
+          
+          # Keep all native modules used in the app
+          -keep class com.reactnativecommunity.** { *; }
+          -keep class org.reactnative.** { *; }
+          -dontwarn com.reactnativecommunity.**
+          -dontwarn org.reactnative.**
+          
+          # 保守的混淆配置 - 仅移除日志
+          -assumenosideeffects class android.util.Log {
+              public static boolean isLoggable(java.lang.String, int);
+              public static int v(...);
+              public static int i(...);
+              public static int w(...);
+              public static int d(...);
+              public static int e(...);
+          }
+          
+          # Keep all classes with @Keep annotation
+          -keep @interface androidx.annotation.Keep
+          -keep @androidx.annotation.Keep class *
+          -keepclassmembers class * {
+              @androidx.annotation.Keep *;
+          }
+          
+          # React Native specifics
+          -keepclassmembers class * {
+              @com.facebook.react.uimanager.annotations.ReactProp <methods>;
+          }
+          -keepclassmembers class * {
+              @com.facebook.react.uimanager.annotations.ReactPropGroup <methods>;
+          }
+          -keepclassmembers class * {
+              void *(**On*Event)(com.facebook.react.bridge.WritableMap);
+          }
+          EOF
 
       - name: Setup Android Keystore
         run: |
@@ -108,7 +199,7 @@ jobs:
       - name: Upload APK ${{ matrix.abi }}
         uses: actions/upload-artifact@v4
         with:
-          name: apk-no-proguard-${{ matrix.abi }}
+          name: apk-${{ matrix.abi }}
           path: output/app-${{ matrix.abi }}-release.apk
 
   universal:
@@ -121,7 +212,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18.x
+          node-version: 19.x
           cache: 'npm'
 
       - name: Setup Java
@@ -155,22 +246,113 @@ jobs:
           mkdir -p android/app/src/main/res/xml/
           cp assets/network_security_config.xml android/app/src/main/res/xml/
 
-      - name: Enable Hermes and optimize build
+      - name: Configure ProGuard for release
         run: |
-          # 启用Hermes引擎优化性能
-          echo "启用Hermes引擎进行性能优化"
-          
-          # 确保Hermes已启用
-          if ! grep -q "enableHermes" android/app/build.gradle; then
-            perl -i -pe 's/(android\s*\{)/\1\n    project.ext.react = [\n        enableHermes: true\n    ]/' android/app/build.gradle
-          fi
-          
-          # 适度启用优化而不是完全禁用ProGuard
+          # 启用代码压缩但禁用混淆，避免Matrix SDK问题
           if ! grep -q "minifyEnabled true" android/app/build.gradle; then
-            perl -i -pe 's/(release\s*\{)/\1\n            minifyEnabled true\n            shrinkResources true\n            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"/' android/app/build.gradle
+            perl -i -pe 's/(release\s*\{)/\1\n            minifyEnabled true\n            shrinkResources false\n            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"/' android/app/build.gradle
           fi
           
-          echo "Hermes已启用，构建优化已配置"
+          # 创建更安全的ProGuard规则文件
+          cat > android/app/proguard-rules.pro << 'EOF'
+          # Keep React Native and Expo
+          -keep class com.facebook.react.** { *; }
+          -keep class com.facebook.hermes.** { *; }
+          -keep class expo.** { *; }
+          -keep class versioned.host.exp.exponent.** { *; }
+          -dontwarn com.facebook.react.**
+          -dontwarn expo.**
+          
+          # Keep Matrix SDK
+          -keep class org.matrix.** { *; }
+          -keep class matrix.** { *; }
+          -dontwarn org.matrix.**
+          -dontwarn matrix.**
+          
+          # Keep Node.js polyfills
+          -keep class com.peel.** { *; }
+          -keep class com.tradle.** { *; }
+          -keep class stream.** { *; }
+          -keep class crypto.** { *; }
+          -keep class buffer.** { *; }
+          -keep class events.** { *; }
+          -keep class util.** { *; }
+          -keep class url.** { *; }
+          -keep class querystring.** { *; }
+          -dontwarn com.peel.**
+          -dontwarn com.tradle.**
+          -dontwarn stream.**
+          -dontwarn crypto.**
+          -dontwarn buffer.**
+          -dontwarn events.**
+          -dontwarn util.**
+          -dontwarn url.**
+          -dontwarn querystring.**
+          
+          # Keep polyfills and native modules
+          -keep class * implements com.facebook.react.bridge.NativeModule { *; }
+          -keep class * implements com.facebook.react.turbomodule.core.TurboModule { *; }
+          -keep class * implements com.facebook.react.bridge.JavaScriptModule { *; }
+          
+          # Keep application entry points
+          -keep class * extends android.app.Application
+          -keep class * extends android.app.Activity
+          -keep class * extends android.app.Service
+          -keep class * extends android.content.BroadcastReceiver
+          -keep class * extends android.content.ContentProvider
+          
+          # Keep AsyncStorage
+          -keep class com.reactnativecommunity.asyncstorage.** { *; }
+          -dontwarn com.reactnativecommunity.asyncstorage.**
+          
+          # Keep Video components
+          -keep class com.brentvatne.** { *; }
+          -dontwarn com.brentvatne.**
+          
+          # Keep WebView
+          -keep class com.reactnativecommunity.webview.** { *; }
+          -dontwarn com.reactnativecommunity.webview.**
+          
+          # Keep SQLite
+          -keep class org.sqlite.** { *; }
+          -keep class io.expo.sqlite.** { *; }
+          -dontwarn org.sqlite.**
+          -dontwarn io.expo.sqlite.**
+          
+          # Keep all native modules used in the app
+          -keep class com.reactnativecommunity.** { *; }
+          -keep class org.reactnative.** { *; }
+          -dontwarn com.reactnativecommunity.**
+          -dontwarn org.reactnative.**
+          
+          # 保守的混淆配置 - 仅移除日志
+          -assumenosideeffects class android.util.Log {
+              public static boolean isLoggable(java.lang.String, int);
+              public static int v(...);
+              public static int i(...);
+              public static int w(...);
+              public static int d(...);
+              public static int e(...);
+          }
+          
+          # Keep all classes with @Keep annotation
+          -keep @interface androidx.annotation.Keep
+          -keep @androidx.annotation.Keep class *
+          -keepclassmembers class * {
+              @androidx.annotation.Keep *;
+          }
+          
+          # React Native specifics
+          -keepclassmembers class * {
+              @com.facebook.react.uimanager.annotations.ReactProp <methods>;
+          }
+          -keepclassmembers class * {
+              @com.facebook.react.uimanager.annotations.ReactPropGroup <methods>;
+          }
+          -keepclassmembers class * {
+              void *(**On*Event)(com.facebook.react.bridge.WritableMap);
+          }
+          EOF
 
       - name: Setup Android Keystore
         run: |
@@ -199,7 +381,7 @@ jobs:
       - name: Upload Universal APK
         uses: actions/upload-artifact@v4
         with:
-          name: apk-no-proguard-universal
+          name: apk-universal
           path: output/app-universal-release.apk
 
   release:
@@ -219,7 +401,7 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          name: Release ${{ steps.get_version.outputs.VERSION }} (No ProGuard)
+          name: Release ${{ steps.get_version.outputs.VERSION }}
           files: |
             dist/**/*.apk
 
@@ -237,7 +419,7 @@ jobs:
         uses: marvinpinto/action-automatic-releases@latest
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          automatic_release_tag: latest-no-proguard
-          title: "Latest Build (No ProGuard Test)"
+          automatic_release_tag: latest
+          title: "Latest Build"
           files: |
-            latest/**/*.apk 
+            latest/**/*.apk
